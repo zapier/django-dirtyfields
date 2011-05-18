@@ -1,6 +1,8 @@
 # Adapted from http://stackoverflow.com/questions/110803/dirty-fields-in-django
+from copy import deepcopy
 from django.db.models.signals import post_save
 from django.db import connection
+import pickle
 
 def reset_instance(instance, *args, **kwargs):
     instance._reset_state()
@@ -25,9 +27,7 @@ class DirtyFieldsMixin(object):
         # For relations, saves all fk values too so that we can update fk by id, e.g. obj.foreignkey_id = 4
         if self._deferred:
             return {}
-        values = dict([(f.name, getattr(self, f.name)) for f in self._meta.fields if not f.rel])
-        values.update(dict([(f.column, getattr(self, f.column)) for f in self._meta.fields if f.rel]))
-        return values
+        return dict([(f.column, pickle.dumps(getattr(self, f.column))) for f in self._meta.fields])
     
     def get_changed_values(self):
         changed = {}
@@ -35,18 +35,18 @@ class DirtyFieldsMixin(object):
             changed[field] = getattr(self, field)
         return changed
     
-    def get_dirty_fields(self):
+    def get_dirty_fields(self, unpickle=True):
         if self._deferred:
             raise TypeError('Cant be used with deferred objects')
         new_state = self._as_dict()
-        return dict([(key, value) for key, value in self._original_state.iteritems() if value != new_state[key]])
+        return dict([(key, pickle.loads(value)) for key, value in self._original_state.iteritems() if value != new_state[key]])
     
     def is_dirty(self):
         # in order to be dirty we need to have been saved at least once, so we
         # check for a primary key and we need our dirty fields to not be empty
         if not self.pk: 
             return True
-        return {} != self.get_dirty_fields()
+        return {} != self.get_dirty_fields(unpickle=False)
 
     def save_dirty(self):
         '''
@@ -54,6 +54,7 @@ class DirtyFieldsMixin(object):
         '''
         if not self.pk:
             self.save()
+            updated == 1
         else:
             changed_values = self.get_changed_values()
             if len(self.get_changed_values().keys()) == 0:
@@ -75,7 +76,7 @@ class DirtyFieldsMixin(object):
                     if value != obj_value:
                         updated_rel_ids.append(rel_field.column)
                     
-            self.__class__.objects.filter(pk=self.pk).update(**changed_values)
+            updated = self.__class__.objects.filter(pk=self.pk).update(**changed_values)
             
             # Reload updated relationships
             for field_name in updated_rel_ids:
@@ -86,4 +87,4 @@ class DirtyFieldsMixin(object):
                 
             self._reset_state()
             
-        return True
+        return updated == 1
