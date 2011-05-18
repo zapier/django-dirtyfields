@@ -1,7 +1,5 @@
 # Adapted from http://stackoverflow.com/questions/110803/dirty-fields-in-django
-from copy import deepcopy
 from django.db.models.signals import post_save
-from django.db import connection
 import pickle
 
 def reset_instance(instance, *args, **kwargs):
