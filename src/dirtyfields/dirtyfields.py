@@ -2,6 +2,9 @@
 from django.db.models.signals import post_save
 from django.db import connection
 
+def reset_instance(instance, *args, **kwargs):
+    instance._reset_state()
+
 class DirtyFieldsMixin(object):
     '''
     Gives dirty field tracking ability to models, also implements a save_dirty method
@@ -11,22 +14,17 @@ class DirtyFieldsMixin(object):
     '''
     def __init__(self, *args, **kwargs):
         super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
-        post_save.connect(self._reset_state, sender=self.__class__, 
+        post_save.connect(reset_instance, sender=self.__class__,
                           dispatch_uid='%s-DirtyFieldsMixin-sweeper' % self.__class__.__name__)
         self._reset_state()
     
     def _reset_state(self, *args, **kwargs):
-        return
         self._original_state = self._as_dict()
     
     def _as_dict(self):
         # For relations, saves all fk values too so that we can update fk by id, e.g. obj.foreignkey_id = 4
-        print len(connection.queries)
         values = dict([(f.name, getattr(self, f.name)) for f in self._meta.fields if not f.rel])
-        print len(connection.queries)
         values.update(dict([(f.column, getattr(self, f.column)) for f in self._meta.fields if f.rel]))
-        print len(connection.queries)
-        print "---"
         return values
     
     def get_changed_values(self):
