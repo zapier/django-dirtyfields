@@ -18,7 +18,16 @@ class DirtyFieldsMixin(object):
         self._original_state = self._as_dict()
     
     def _as_dict(self):
-        values = dict([(f.name, getattr(self, f.name)) for f in self._meta.fields])
+        values = {}
+        for f in self._meta.fields:
+            if f.rel:
+                try:
+                    val = getattr(self, f.name)
+                except f.related.parent_model.DoesNotExist:
+                    val = None
+            else:
+                val = getattr(self, f.name)
+            values[f.name] = val 
         # Saves all related field values too so that we can update fk by id, e.g. obj.foreignkey_id = 4
         values.update(dict([(f.column, getattr(self, f.column)) for f in self._meta.fields if f.rel]))
         return values
