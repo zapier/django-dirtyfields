@@ -1,5 +1,6 @@
 # Adapted from http://stackoverflow.com/questions/110803/dirty-fields-in-django
 from django.db.models.signals import post_save
+from django.db import connection
 
 class DirtyFieldsMixin(object):
     '''
@@ -15,21 +16,17 @@ class DirtyFieldsMixin(object):
         self._reset_state()
     
     def _reset_state(self, *args, **kwargs):
+        return
         self._original_state = self._as_dict()
     
     def _as_dict(self):
-        values = {}
-        for f in self._meta.fields:
-            if f.rel:
-                try:
-                    val = getattr(self, f.name)
-                except f.related.parent_model.DoesNotExist:
-                    val = None
-            else:
-                val = getattr(self, f.name)
-            values[f.name] = val 
-        # Saves all related field values too so that we can update fk by id, e.g. obj.foreignkey_id = 4
+        # For relations, saves all fk values too so that we can update fk by id, e.g. obj.foreignkey_id = 4
+        print len(connection.queries)
+        values = dict([(f.name, getattr(self, f.name)) for f in self._meta.fields if not f.rel])
+        print len(connection.queries)
         values.update(dict([(f.column, getattr(self, f.column)) for f in self._meta.fields if f.rel]))
+        print len(connection.queries)
+        print "---"
         return values
     
     def get_changed_values(self):
@@ -72,8 +69,8 @@ class DirtyFieldsMixin(object):
                     value = changed_values[rel_field.column]
                     obj_value = getattr(self, rel_field.name).pk
                     del changed_values[rel_field.column]
+                    changed_values[rel_field.name] = value
                     if value != obj_value:
-                        changed_values[rel_field.name] = value
                         updated_rel_ids.append(rel_field.column)
                     
             self.__class__.objects.filter(pk=self.pk).update(**changed_values)
