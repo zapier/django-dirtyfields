@@ -30,10 +30,7 @@ class DirtyFieldsMixin(object):
         return dict([(f.column, pickle.dumps(getattr(self, f.column))) for f in self._meta.fields])
     
     def get_changed_values(self):
-        changed = {}
-        for field in self.get_dirty_fields().keys():
-            changed[field] = getattr(self, field)
-        return changed
+        return dict([(field, getattr(self, field)) for field in self.get_dirty_fields().keys()])
     
     def get_dirty_fields(self, unpickle=True):
         if self._deferred:
