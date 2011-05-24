@@ -31,7 +31,12 @@ class DirtyFieldsMixin(object):
         self._original_state = self._as_dict()
     
     def _get_field_value(self, f):
-        val = getattr(self, f.column)
+        # If rel then use actual DB column name to use actual FK id
+        if f.rel:
+            val = getattr(self, f.column)
+        # Else use field name, as can actually be set to be different from db column name
+        else:
+            val = getattr(self, f.name)
         if f.column in self._pickle_fields:
             val = pickle.dumps(val)
         return val
