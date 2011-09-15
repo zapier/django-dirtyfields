@@ -33,7 +33,7 @@ class DirtyFieldsMixin(object):
     def _get_field_value(self, f):
         # If rel then use actual DB column name to use actual FK id
         if f.rel:
-            val = getattr(self, f.column)
+            val = getattr(self, f.attname)
         # Else use field name, as can actually be set to be different from db column name
         else:
             val = getattr(self, f.name)
