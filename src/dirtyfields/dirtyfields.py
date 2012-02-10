@@ -1,5 +1,5 @@
 # Adapted from http://stackoverflow.com/questions/110803/dirty-fields-in-django
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 try:
     from picklefield import PickledObjectField
     import pickle
@@ -80,6 +80,8 @@ class DirtyFieldsMixin(object):
             if len(changed_values.keys()) == 0:
                 return False
 
+            pre_save.send(sender=self.__class__, instance=self)
+
             # Detect if updating relationship field_ids directly
             # If related field object itself has changed then the field_id
             # also changes, in which case we detect and ignore the field_id
@@ -113,5 +115,6 @@ class DirtyFieldsMixin(object):
                 setattr(self, field.name, rel_obj)
 
             self._reset_state()
+            post_save.send(sender=self.__class__, instance=self, created=False)
 
         return updated == 1
