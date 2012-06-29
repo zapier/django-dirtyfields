@@ -13,8 +13,11 @@ class DirtyFieldsMixin(object):
         return dict((f.name, f.to_python(getattr(self, f.attname))) for f in self._meta.local_fields)
 
     def get_dirty_fields(self):
+        """
+        Returns a list of keys that have changed
+        """
         new_state = self._as_dict()
-        return dict((k, v) for k, v in self._original_state.iteritems() if v != new_state[k])
+        return tuple(k for k, v in self._original_state.iteritems() if v != new_state[k])
 
     @property
     def is_dirty(self):
