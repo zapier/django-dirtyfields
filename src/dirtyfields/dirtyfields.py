@@ -16,12 +16,13 @@ class DirtyFieldsMixin(object):
         new_state = self._as_dict()
         return dict((k, v) for k, v in self._original_state.iteritems() if v != new_state[k])
 
+    @property
     def is_dirty(self):
         # in order to be dirty we need to have been saved at least once, so we
         # check for a primary key and we need our dirty fields to not be empty
         if not self.pk:
             return True
-        return {} != self.get_dirty_fields()
+        return bool(self.get_dirty_fields())
 
 
 def reset_state(sender, instance, **kwargs):
