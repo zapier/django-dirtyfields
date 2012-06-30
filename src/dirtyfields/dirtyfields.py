@@ -23,9 +23,13 @@ class DirtyFieldsMixin(object):
     def is_dirty(self):
         # in order to be dirty we need to have been saved at least once, so we
         # check for a primary key and we need our dirty fields to not be empty
-        if not self.pk:
+        if self._state.adding:
             return True
         return bool(self.get_dirty_fields())
+
+    def save(self, *args, **kwargs):
+        kwargs['update_fields'] = self.get_dirty_fields()
+        return super(DirtyFieldsMixin, self).save(*args, **kwargs)
 
 
 def reset_state(sender, instance, **kwargs):
