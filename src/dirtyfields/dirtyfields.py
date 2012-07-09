@@ -1,4 +1,5 @@
 # Adapted from http://stackoverflow.com/questions/110803/dirty-fields-in-django
+from django import VERSION
 from django.db.models.signals import post_save
 
 
@@ -27,10 +28,15 @@ class DirtyFieldsMixin(object):
             return True
         return bool(self.get_dirty_fields())
 
-    def save(self, *args, **kwargs):
-        kwargs['update_fields'] = self.get_dirty_fields()
-        return super(DirtyFieldsMixin, self).save(*args, **kwargs)
-
 
 def reset_state(sender, instance, **kwargs):
     instance._original_state = instance._as_dict()
+
+
+# Django 1.5 added support for updating only specified fields, this fails in
+# older versions.
+if VERSION >= (1, 5):
+    def save(self, *args, **kwargs):
+        kwargs['update_fields'] = self.get_dirty_fields()
+        return super(DirtyFieldsMixin, self).save(*args, **kwargs)
+    DirtyFieldsMixin.save = save
