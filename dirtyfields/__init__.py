@@ -26,5 +26,5 @@ __version__ = get_version()
 
 try:
     from dirtyfields import DirtyFieldsMixin
-except ImportError:
+except:
     pass
