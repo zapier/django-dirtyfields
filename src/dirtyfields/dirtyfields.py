@@ -36,9 +36,10 @@ class DirtyFieldsMixin(object):
         return dict([(f.name, f.to_python(getattr(self, f.attname))) for f in self._meta.local_fields])
 
     def get_changed_values(self):
-        return dict([(field, getattr(self, field)) for field in self.get_dirty_fields().keys()])
+        return dict([(field, getattr(self, field)) for field in self.dirty_fields])
 
-    def get_dirty_fields(self):
+    @property
+    def dirty_fields(self):
         """
         Returns a list of keys that have changed
         """
@@ -51,7 +52,7 @@ class DirtyFieldsMixin(object):
     def is_dirty(self):
         if self._state.adding:
             return True
-        return bool(self.get_dirty_fields())
+        return bool(self.dirty_fields)
 
     def save_dirty(self):
         '''
@@ -109,6 +110,6 @@ class DirtyFieldsMixin(object):
 # older versions.
 if VERSION >= (1, 5):
     def save(self, *args, **kwargs):
-        kwargs['update_fields'] = self.get_dirty_fields()
+        kwargs['update_fields'] = self.dirty_fields
         return super(DirtyFieldsMixin, self).save(*args, **kwargs)
     DirtyFieldsMixin.save = save
