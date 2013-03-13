@@ -4,27 +4,33 @@ from django.db.models.signals import post_save, pre_save
 
 
 def reset_instance(instance, *args, **kwargs):
+    """
+    Called on the post_save signal. Calls the instance's _reset_state method
+    """
     instance._reset_state()
 
 
 class DirtyFieldsMixin(object):
-    '''
-    Gives dirty field tracking ability to models, also implements a save_dirty method
-    which updates only the dirty fields using QuerySet.update - useful for multi-process
-    or multi-worker setups where save() will actually update all fields, potentially
-    overriding changes by other workers while the current worker has the object open.
-    '''
+    """
+    Gives dirty field tracking ability to models, also implements a save_dirty
+    method which updates only the dirty fields using QuerySet.update - useful
+    for multi-process or multi-worker setups where save() will actually update
+    all fields, potentially overriding changes by other workers while the
+    current worker has the object open.
+    """
     def __init__(self, *args, **kwargs):
         super(DirtyFieldsMixin, self).__init__(*args, **kwargs)
+        dispatch_uid = '%s-DirtyFieldsMixin-sweeper' % self.__class__.__name__
         post_save.connect(reset_instance, sender=self.__class__,
-                          dispatch_uid='%s-DirtyFieldsMixin-sweeper' % self.__class__.__name__)
+                          dispatch_uid=dispatch_uid)
         self._reset_state()
 
     def _reset_state(self, *args, **kwargs):
         self._original_state = self._as_dict()
 
     def _as_dict(self):
-        # For relations, saves all fk values too so that we can update fk by id, e.g. obj.foreignkey_id = 4
+        # For relations, saves all fk values too so that we can update fk by
+        # id, e.g. obj.foreignkey_id = 4
         if self._deferred:
             return {}
         return dict([(f.name, f.to_python(getattr(self, f.attname))) for f in self._meta.local_fields])
@@ -43,8 +49,6 @@ class DirtyFieldsMixin(object):
 
     @property
     def is_dirty(self):
-        # in order to be dirty we need to have been saved at least once, so we
-        # check for a primary key and we need our dirty fields to not be empty
         if self._state.adding:
             return True
         return bool(self.get_dirty_fields())
@@ -99,10 +103,6 @@ class DirtyFieldsMixin(object):
             post_save.send(sender=self.__class__, instance=self, created=False)
 
         return updated == 1
-
-
-def reset_state(sender, instance, **kwargs):
-    instance._original_state = instance._as_dict()
 
 
 # Django 1.5 added support for updating only specified fields, this fails in
