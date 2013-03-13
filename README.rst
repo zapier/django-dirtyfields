@@ -56,28 +56,27 @@ Using it in the shell
 
     (ve)$ ./manage.py shell
     >>> from testing_app.models import TestModel
-    >>> tm = TestModel(boolean=True,characters="testing")
+    >>> tm = TestModel(boolean=True, characters="testing")
     >>> tm.save()
-    >>> tm.is_dirty()
+    >>> tm.is_dirty
     False
-    >>> tm.get_dirty_fields()
-    {}
+    >>> tm.dirty_fields
+    ()
     >>> tm.boolean = False
-    >>> tm.is_dirty()
+    >>> tm.is_dirty
     True
-    >>> tm.get_dirty_fields()
-    {'boolean': True}
+    >>> tm.dirty_fields
+    ('boolean', )
     >>> tm.characters = "have changed"
-    >>> tm.is_dirty()
+    >>> tm.is_dirty
     True
-    >>> tm.get_dirty_fields()
-    {'boolean': True, 'characters': 'testing'}
+    >>> tm.dirty_fields
+    ('boolean', 'characters', )
     >>> tm.save()
-    >>> tm.is_dirty()
+    >>> tm.is_dirty
     False
-    >>> tm.get_dirty_fields()
-    {}
-    >>>
+    >>> tm.get_dirty_fields
+    ()
 
 Why would you want this?
 ========================
