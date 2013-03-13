@@ -55,9 +55,10 @@ class DirtyFieldsMixin(object):
         return bool(self.dirty_fields)
 
     def save_dirty(self):
-        '''
-        An alternative to save, instead writing every field again, only updates the dirty fields via QuerySet.update
-        '''
+        """
+        An alternative to save, instead writing every field again, only updates
+        the dirty fields via QuerySet.update
+        """
         if not self.pk:
             self.save()
             updated = 1
@@ -110,6 +111,7 @@ class DirtyFieldsMixin(object):
 # older versions.
 if VERSION >= (1, 5):
     def save(self, *args, **kwargs):
-        kwargs['update_fields'] = self.dirty_fields
+        if not self._state.adding:
+            kwargs['update_fields'] = self.dirty_fields
         return super(DirtyFieldsMixin, self).save(*args, **kwargs)
     DirtyFieldsMixin.save = save
