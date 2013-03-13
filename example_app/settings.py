@@ -1,5 +1,12 @@
 # Django settings for example_app project.
 
+import os
+import sys
+
+BASE_DIR = os.path.dirname(__file__)
+APP = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(APP)
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
