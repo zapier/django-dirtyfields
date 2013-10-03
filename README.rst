@@ -15,7 +15,7 @@ As well as the methods:
 
 Which will will selectively only update dirty columns using the
 familiar ``Model.objects.filter(pk=pk).update(**dirty_fields)``
-pattern.
+pattern (but still resolves ``F()`` or ``auto_now`` constructs).
 
 
 Installing
