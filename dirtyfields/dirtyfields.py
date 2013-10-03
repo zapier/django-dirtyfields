@@ -1,5 +1,6 @@
 # Adapted from http://stackoverflow.com/questions/110803/dirty-fields-in-django
 from django import VERSION
+from django.db import router
 from django.db.models.signals import post_save, pre_save
 
 
@@ -54,20 +55,23 @@ class DirtyFieldsMixin(object):
             return True
         return bool(self.dirty_fields)
 
-    def save_dirty(self):
+    def save_dirty(self, raw=False, using=None):
         """
         An alternative to save, instead writing every field again, only updates
         the dirty fields via QuerySet.update
         """
         if not self.pk:
-            self.save()
+            self.save(using=using)
             updated = 1
         else:
+            # a lot copied from django/db/models/base.py
+            using = using or router.db_for_write(self.__class__, instance=self)
+
             changed_values = self.get_changed_values()
             if len(changed_values.keys()) == 0:
                 return False
 
-            pre_save.send(sender=self.__class__, instance=self)
+            pre_save.send(sender=self.__class__, instance=self, raw=raw, using=using)
 
             # Detect if updating relationship field_ids directly
             # If related field object itself has changed then the field_id
@@ -102,7 +106,7 @@ class DirtyFieldsMixin(object):
                 setattr(self, field.name, rel_obj)
 
             self._reset_state()
-            post_save.send(sender=self.__class__, instance=self, created=False)
+            post_save.send(sender=self.__class__, instance=self, created=False, raw=raw, using=using)
 
         return updated == 1
 

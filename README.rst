@@ -9,6 +9,14 @@ Makes a Mixin available that will give you the properties:
  * ``is_dirty``
  * ``dirty_fields``
 
+As well as the methods:
+
+ * ``save_dirty()``
+
+Which will will selectively only update dirty columns using the
+familiar ``Model.objects.filter(pk=pk).update(**dirty_fields)``
+pattern.
+
 
 Installing
 ==========
