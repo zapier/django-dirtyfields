@@ -21,7 +21,7 @@ Why This Branch?
 
 It's always annoying to browse various active branches with no context about how they differ outside of diffs. So, we'll just tell you! :-)
 
-We're building off the dirtyfields_ branc by Calloway Projec that added some ``update()`` features around dirty fields. However, we fixed two bugs:
+We're building off the dirtyfields_ branch by Calloway Project that added some ``update()`` features around dirty fields. However, we fixed two bugs:
 
  * Pre/Post save events have proper kwargs passed in.
  * ``foreign_key_id`` attributes that accompany ``foreign_key`` model fields are properly handled.
