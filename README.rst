@@ -1,3 +1,6 @@
+**Take a look at https://github.com/zapier/django-stalefields for a newer, better supported version!**
+
+
 ===================
 Django Dirty Fields
 ===================
