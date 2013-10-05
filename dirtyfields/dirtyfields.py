@@ -6,7 +6,7 @@ from django.db.models.signals import post_save, pre_save
 
 def reset_instance(instance, *args, **kwargs):
     """
-    Called on the post_save signal. Calls the instance's _reset_state method
+    Called on the post_save signal.
     """
     instance._reset_state()
 
