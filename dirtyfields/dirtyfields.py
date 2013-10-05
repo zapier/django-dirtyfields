@@ -34,10 +34,11 @@ class DirtyFieldsMixin(object):
         # id, e.g. obj.foreignkey_id = 4
         if self._deferred:
             return {}
-        return dict([(f.name, f.to_python(getattr(self, f.attname))) for f in self._meta.local_fields])
+        return {f.name: f.to_python(getattr(self, f.attname)) for f in self._meta.fields}
 
     def get_changed_values(self):
-        return dict([(field, getattr(self, field)) for field in self.dirty_fields])
+        values = self._as_dict()
+        return {f.name: values[f.name] for f in self._meta.fields if f.name in self.dirty_fields}
 
     @property
     def dirty_fields(self):
@@ -77,7 +78,7 @@ class DirtyFieldsMixin(object):
             # If related field object itself has changed then the field_id
             # also changes, in which case we detect and ignore the field_id
             # change, otherwise we'll reload the object again later unnecessarily
-            rel_fields = dict([(f.column, f) for f in self._meta.fields if f.rel])
+            rel_fields = {f.column: f for f in self._meta.fields if f.rel}
             updated_rel_ids = []
             for field_name in changed_values.keys():
                 if field_name in rel_fields.keys():
@@ -90,7 +91,7 @@ class DirtyFieldsMixin(object):
                         updated_rel_ids.append(rel_field.column)
 
             # Maps db column names back to field names if they differ
-            field_map = dict([(f.column, f.name) for f in self._meta.fields if f.db_column])
+            field_map = {f.column: f.name for f in self._meta.fields if f.db_column}
             for field_from, field_to in field_map.iteritems():
                 if field_from in changed_values:
                     changed_values[field_to] = changed_values[field_from]

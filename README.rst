@@ -27,19 +27,18 @@ Install the package using pip_. Then use the instructions in "Using the Mixin in
 
     $ pip install django-dirtyfields
 
-or if you're interested in developing it, use virtualenv_. The default ``settings.py`` will look for the dirtyfields package in its current location.
+or if you're interested in developing it, use virtualenv_ and virtualenvwrapper_. The default ``settings.py`` will look for the dirtyfields package in its current location.
 
 ::
 
-    $ virtualenv --no-site-packages ve/
-    $ source ve/bin/activate
-    (ve)$ cd example_app
-    (ve)$ pip install -r requirements.pip
-    (ve)$ ./manage.py test testing_app
+    $ mkvirtualenv django-dirtyfields
+    (django-dirtyfields)$ pip install -r example_app/requirements.pip
+    (django-dirtyfields)$ example_app/manage.py test testing_app
 
 
 .. _pip: http://www.pip-installer.org/en/latest/
 .. _virtualenv: https://pypi.python.org/pypi/virtualenv
+.. _virtualenvwrapper: https://pypi.python.org/pypi/virtualenvwrapper
 
 
 
