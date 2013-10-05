@@ -6,12 +6,12 @@ Tracking changed fields on a Django model instance.
 
 Makes a Mixin available that will give you the properties:
 
- * ``is_dirty``
- * ``dirty_fields``
+* ``is_dirty``
+* ``dirty_fields``
 
 As well as the methods:
 
- * ``save_dirty()``
+* ``save_dirty()``
 
 Which will will selectively only update dirty columns using the familiar ``Model.objects.filter(pk=pk).update(**dirty_fields)`` pattern (but still resolves ``F()`` or ``auto_now`` constructs).
 
@@ -23,10 +23,10 @@ It's always annoying to browse various active branches with no context about how
 
 We're building off the dirtyfields_ branch by Calloway Project that added some ``update()`` features around dirty fields. However, we fixed two bugs:
 
- * Pre/Post save events have proper kwargs passed in.
- * ``foreign_key_id`` attributes that accompany ``foreign_key`` model fields are properly handled.
+* Pre/Post save events have proper kwargs passed in.
+* ``foreign_key_id`` attributes that accompany ``foreign_key`` model fields are properly handled.
 
- Thats it really! We've also added a few tests around ``.save_dirty()``. Enjoy!
+Thats it really! We've also added a few tests around ``save_dirty()``. Enjoy!
 
 .. _dirtyfields: https://github.com/callowayproject/django-dirtyfields
 
